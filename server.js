@@ -3,21 +3,7 @@ var app = require('http').createServer(handler)
 , fs = require('fs')
 
 var port = process.env.PORT || 1337;
-app.listen(port)
-
-//Storage of all data
-var events = {};
-
-
-// holds 20 events 
-var rpi_bt = [];
-var rpi_wifi = [];
-var wemo_switch = [];
-var wemo_motion = [];
-var android_location = [];
-var android_sms = [];
-var weather = [];
-
+app.listen(port);
 
 function handler (req, res) {
   fs.readFile(__dirname + '/index.html',
@@ -29,80 +15,101 @@ function handler (req, res) {
       res.writeHead(200);
       res.end(data);
   });
-
-  if(req.method == 'POST'){
-    var body = ''
-    
-    req.on('data', function (data) {
-        body += data;
-    });
-
-    req.on('end', function () {
-        var json = body, obj = JSON.parse(json);  
-        console.log(obj);
-        obj.time = new Date();
-        switch(obj.type){
-            case "RPI-WIFI":
-            if(rpi_wifi.length< 20)
-              rpi_wifi.push(obj);
-            else{
-              rpi_wifi.pop();
-              rpi_wifi.push(obj);
-            }break;
-            case "RPI-BT":
-            if(rpi_bt.length< 20)
-              rpi_bt.push(obj);
-            else{
-              rpi_bt.pop();
-              rpi_bt.push(obj);
-            }break;
-            case "WEMO-SWITCH":
-            if(wemo_switch.length< 20)
-              wemo_switch.push(obj);
-            else{
-              wemo_switch.pop();
-              wemo_switch.push(obj);
-            }break;
-            case "WEMO-MOTION":
-            if(wemo_motion.length< 20)
-              wemo_motion.push(obj);
-            else{
-              wemo_motion.pop();
-              wemo_motion.push(obj);
-            }break;
-            case "ANDROID-LOCATION":
-            if(android_location.length< 20)
-              android_location.push(obj);
-            else{
-              android_location.pop();
-              android_location.push(obj);
-            }break;
-            case "ANDROID-SMS":
-            if(android_sms.length< 20)
-              android_sms.push(obj);
-            else{
-              return;
-            }break;
-        }
-        console.log(obj);
-        io.emit('_post',obj);
-    });
-  }
 }
 
 io.on('connection', function (socket) {
-  socket.emit("_load",packageEvents());
+  
 });
 
-console.log('Listening...');
+io.on('join',function(socket,data){ //join game
+  var newPlayer = new Player(data.name);
+  findGame(data.gameID,newPlayer);
+});
 
-function packageEvents(){
-  events.rpi_bt = rpi_bt;
-  console.log(events.rpi_bt);
-  events.rpi_wifi = rpi_wifi;
-  events.wemo_switch = wemo_switch;
-  events.wemo_motion = wemo_motion;
-  events.android_location = android_location;
-  events.android_sms = android_sms;
-  return events;
+io.on('start',function(socket,data){  //start game
+  
+});
+
+io.on('choose',function(socket,data){ //choose gametype
+  
+});
+io.on('vote',function(socket,data){   //vote on game choices
+  
+});
+io.on('submit',function(socket,data){ //submit answer
+  
+});
+
+console.log('Listening on port ' + port );
+
+function GameServer(){
+  this.games = [];
+  this.running = true;
 }
+
+function Game(i,p){
+  this.ready = false;
+  this.ID = i;
+  this.players = [];
+  this.players.push(p);
+}
+
+function Player(n){
+  this.name = n;
+  this.score = 0;
+  this.ready = false;
+  this.submission = null;
+}
+
+function findGame(id, player){
+  for(var i = 0; i < server.games.length; i++){
+    if(server.games[i].ID === id){
+      server.games[i].players.push(player);
+      return true;
+    }
+  } 
+      return false;
+}
+
+function startGame(player){
+  var newID = makeid();
+  var gameExists = false;
+  for(var i = 0; i < server.games.length; i++){
+    if(newID === server.games[i].id)
+      gameExists = true;
+  }
+  if(!gameExists)
+    server.games.push(new Game(newID,player));
+}
+
+function makeid(){
+    var text = "";
+    var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+
+    for( var i=0; i < 4; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+
+    return text;
+}
+
+function receiveSubmissions(){
+//create timer for 30 sec\
+//at the end emit display
+}
+
+function displaySubmissions(){
+// for each submissiokn 
+//display for 5 seconds
+//winner gets 10 secs
+}
+
+var server = new GameServer();
+console.log(server)
+var a = new Player("a");
+var b = new Player("b");
+var c = new Player("c");
+startGame(a);
+findGame(server.games[0].ID,b);
+console.log(server.games[0].players.length)
+startGame(c);
+console.log(server);
