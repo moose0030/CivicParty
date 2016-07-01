@@ -2,7 +2,7 @@ var app = require('http').createServer(handler)
 , io = require('socket.io')(app)
 , fs = require('fs')
 
-var port = process.env.PORT || 1337;
+var port = process.env.PORT || 1338;
 app.listen(port);
 
 function handler (req, res) {
@@ -18,26 +18,27 @@ function handler (req, res) {
 }
 
 io.on('connection', function (socket) {
-  
-});
+  console.log("A player has logged in.");
 
-io.on('join',function(socket,data){ //join game
+
+socket.on('join',function(data){ //join game
   var newPlayer = new Player(data.name);
   findGame(data.gameID,newPlayer);
 });
 
-io.on('start',function(socket,data){  //start game
-  
+socket.on('start', function(data) {  //start game
+  console.log("Start");
 });
 
-io.on('choose',function(socket,data){ //choose gametype
+socket.on('choose',function(data){ //choose gametype
   
 });
-io.on('vote',function(socket,data){   //vote on game choices
+socket.on('vote',function(data){   //vote on game choices
   
 });
-io.on('submit',function(socket,data){ //submit answer
+socket.on('submit',function(data){ //submit answer
   
+});
 });
 
 console.log('Listening on port ' + port );
@@ -102,7 +103,7 @@ function displaySubmissions(){
 //display for 5 seconds
 //winner gets 10 secs
 }
-
+/*
 var server = new GameServer();
 console.log(server)
 var a = new Player("a");
@@ -113,3 +114,4 @@ findGame(server.games[0].ID,b);
 console.log(server.games[0].players.length)
 startGame(c);
 console.log(server);
+*/
