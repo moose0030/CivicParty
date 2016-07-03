@@ -18,16 +18,23 @@ function handler (req, res) {
 }
 
 io.on('connection', function (socket) {
-  console.log("A player has logged in.");
+  console.log("A player has connected");
 
 
 socket.on('join',function(data){ //join game
+  console.log("Player is attempting to join a game");
   var newPlayer = new Player(data.name);
-  findGame(data.gameID,newPlayer);
+  var rslt = findGame(data.room,newPlayer);
+  socket.emit('joinAck',{game:rslt});
+  socket.broadcast.emit('joinAck',{game:rslt});
+  console.log(server);
 });
 
 socket.on('start', function(data) {  //start game
-  console.log("Start");
+  console.log("Player is attempting to start a game");
+  var rslt = startGame(new Player(data.name));
+  socket.emit('joinAck',{game:rslt});
+  console.log(server);
 });
 
 socket.on('choose',function(data){ //choose gametype
@@ -53,6 +60,7 @@ function Game(i,p){
   this.ID = i;
   this.players = [];
   this.players.push(p);
+  this.running = false;
 }
 
 function Player(n){
@@ -64,12 +72,13 @@ function Player(n){
 
 function findGame(id, player){
   for(var i = 0; i < server.games.length; i++){
-    if(server.games[i].ID === id){
+    if(server.games[i].ID === id  && server.games[i].running === false){
       server.games[i].players.push(player);
-      return true;
+      console.log("Number of players: " + server.games[i].players.length);
+      return server.games[i];
     }
   } 
-      return false;
+      return null;
 }
 
 function startGame(player){
@@ -79,8 +88,11 @@ function startGame(player){
     if(newID === server.games[i].id)
       gameExists = true;
   }
-  if(!gameExists)
+  if(!gameExists){
     server.games.push(new Game(newID,player));
+    console.log("Game " + server.games[server.games.length-1].ID + " started by " +  player.name);
+    return server.games[server.games.length-1]
+  }
 }
 
 function makeid(){
@@ -103,10 +115,10 @@ function displaySubmissions(){
 //display for 5 seconds
 //winner gets 10 secs
 }
-/*
+
 var server = new GameServer();
 console.log(server)
-var a = new Player("a");
+/*var a = new Player("a");
 var b = new Player("b");
 var c = new Player("c");
 startGame(a);

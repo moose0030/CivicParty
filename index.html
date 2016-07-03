@@ -7,17 +7,11 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="bootstrap/favicon.ico">
 
     <title>Civic Party-The Game Where You Have Fun While Being Civicly Responsible</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap theme -->
-    <link href="dist/css/bootstrap-theme.min.css" rel="stylesheet">
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-    <!-- Custom styles for this template -->
-    <link href="theme.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
 
   </head>
 
@@ -83,19 +77,7 @@
       <div class="row" id="gameLobby">
         
         <div class="col-sm-4">
-          <div class="list-group">
-            <a href="#" class="list-group-item active">
-              <h4 class="list-group-item-heading">Player 1</h4>
-              <p class="list-group-item-text">Elite drawer with some temper issues.</p>
-            </a>
-            <a href="#" class="list-group-item">
-              <h4 class="list-group-item-heading">Player 2</h4>
-              <p class="list-group-item-text">Has the vocabulary of an drunk chimpanzee, nice hat tho.</p>
-            </a>
-            <a href="#" class="list-group-item">
-              <h4 class="list-group-item-heading">Player 3</h4>
-              <p class="list-group-item-text">I mean... at least they're here, right?.</p>
-            </a>
+          <div class="list-group" id="playerLobbyList">
           </div>
         </div><!-- /.col-sm-4 -->
         <p><button type="button" onClick="" class="btn btn-lg btn-primary">Ready</button>
@@ -340,20 +322,26 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
-    <script src="dist/js/bootstrap.min.js"></script>
-    <!--<script src="/dist/assets/js/docs.min.js"></script>-->
-    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-   <!-- <script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>-->
+    <!--<script src="dist/js/bootstrap.min.js"></script>-->
     <script src="/socket.io/socket.io.js"></script>
     <script>
     var login = document.getElementById("login");
+    var room = document.getElementById("rm");
+    var name = document.getElementById("nm");
     var gameLobby = document.getElementById("gameLobby");
     var chooseG = document.getElementById("chooseG");
     var gameRules = document.getElementById("gameRules");
     var results = document.getElementById("results");
     var header = document.getElementById("header");
+    var playerLobbyList = document.getElementById("playerLobbyList")
     var socket = io();
+
+    
+    socket.on('joinAck',function(data){
+      console.log(data);
+      UI_GameLobby(data.game);
+    });
     console.log(socket);
 
     HideAll();
@@ -372,10 +360,14 @@
     }
    
     
-    function UI_GameLobby(){
+    function UI_GameLobby(data){
       HideAll();
       login.style.visibility = "hidden";
       gameLobby.style.visibility = "visible";
+      playerLobbyList.innerHTML = "";
+      for(var i = 0; i < data.players.length; i++){
+        playerLobbyList.innerHTML = playerLobbyList.innerHTML +("<a href=&quot;#&quot; class=&quot;list-group-item active&quot;><h4 class=&quot;list-group-item-heading&quot;>"+ data.players[i].name +"</h4><p class=&quot;list-group-item-text&quot;>Score:"+data.players[i].score + "</p>");
+      }
     }
     function UI_ChooseGame(){
       HideAll();
@@ -392,6 +384,8 @@
       
     }
     function joinGame(){
+      console.log(nm.value + " " + rm.value);
+      socket.emit('join',{name: nm.value, room:rm.value});
     
     }
     function chooseGame(){
@@ -399,28 +393,11 @@
     }
     
     function startGame(){
-      var id = makeid();
-      //send request to create game lobby if good
-      if(true){//if server has no issues
-        header.innerHTML = "Game Lobby: " + id;
-        alert("You clicked start")
-        socket.emit('start',"aaaa");
-        UI_GameLobby();
-      }
-      
-    }
-    
-    function makeid()
-    {
-      var text = "";
-      var possible = "abcdefghijklmnopqrstuvwxyz0123456789";
+      //header.innerHTML = "Game Lobby: " + id;
+      alert("You clicked start")
+      socket.emit('start',{name : "Matt"});
 
-      for( var i=0; i < 3; i++ )
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-
-      return text;
     }
-    
     </script>
   </body>
 </html>
