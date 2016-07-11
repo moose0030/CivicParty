@@ -77,8 +77,17 @@ socket.on('start', function(data) {  //start game
   console.log(server);
 });
 
-socket.on('choose',function(data){ //choose gametype
-  
+socket.on('startChoose', function(data) {  //start game
+  /*console.log("Player is attempting to start a game");
+  var rslt = startGame(new Player(data.name));
+  socket.emit('joinAck',{game:rslt});
+  console.log(server);*/
+  socket.broadcast.emit('startVote');
+  socket.emit('startVote');
+});
+
+socket.on('chooseChoose',function(data){ //choose gametype
+  socket.emit()
 });
 socket.on('vote',function(data){   //vote on game choices
   
